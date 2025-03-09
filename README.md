@@ -1,13 +1,36 @@
-# DuckDB Rust extension template
-This is an **experimental** template for Rust based extensions based on the C Extension API of DuckDB. The goal is to 
-turn this eventually into a stable basis for pure-Rust DuckDB extensions that can be submitted to the Community extensions
-repository
+# DuckDB Sqruff Extension
+This is a simple wrapper around the [sqruff](https://github.com/quarylabs/sqruff) Rust library for formatting SQL, using the [DuckDB Rust extension template](https://github.com/duckdb/extension-template-rs).
 
-Features:
-- No DuckDB build required
-- No C++ or C code required
-- CI/CD chain preconfigured
-- (Coming soon) Works with community extensions
+The project is currently very barebones since it's a proof of concept, and requires building locally.
+
+## Usage currently
+
+```
+$ duckdb -unsigned
+D INSTALL '/path/to/duckdb_sqruff.duckdb_extension';
+D LOAD duckdb_sqruff;
+
+-- Set ascii mode, as duckbox does not render newlines
+D .mode ascii
+D FROM duckdb_sqruff('WITH cte AS (SELECT a, b, c from some_table) select * from cte where a > 5;');
+column0
+WITH cte AS (SELECT a, b, c FROM some_table)
+
+SELECT * FROM cte WHERE a > 5;
+```
+
+## Ideal usage (not yet implemented)
+
+```
+-- The ~ at the front triggers a parser error, which this extension checks for and formats the query instead
+D ~WITH cte AS (SELECT a, b, c from some_table) select * from cte where a > 5;
+column0
+WITH cte AS (SELECT a, b, c FROM some_table)
+
+SELECT * FROM cte WHERE a > 5;
+
+```
+
 
 ## Cloning
 
@@ -74,7 +97,7 @@ to ensure the previous `make configure` step is deleted.
 
 Then, run 
 ```
-DUCKDB_TEST_VERSION=v1.1.2 make configure
+DUCKDB_TEST_VERSION=v1.2.1 make configure
 ```
 to select a different duckdb version to test with
 

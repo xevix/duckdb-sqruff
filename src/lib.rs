@@ -12,8 +12,10 @@ use libduckdb_sys as ffi;
 use std::{
     error::Error,
     ffi::CString,
+    mem::take,
     sync::atomic::{AtomicBool, Ordering},
 };
+use sqruff_lib::{api::simple::get_simple_config, core::linter::core::Linter};
 
 #[repr(C)]
 struct HelloBindData {
@@ -50,7 +52,11 @@ impl VTab for HelloVTab {
             output.set_len(0);
         } else {
             let vector = output.flat_vector(0);
-            let result = CString::new(format!("Rusty Quack {} 🐥", bind_data.name))?;
+            let cfg = get_simple_config(Some("duckdb".into()), None, None, None).unwrap();
+            let mut linter = Linter::new(cfg, None, None, false);
+            let mut result = linter.lint_string_wrapped(bind_data.name.as_str(), None, true);
+            let fixed_sql = take(&mut result.paths[0].files[0]).fix_string();
+            let result = CString::new(fixed_sql)?;
             vector.insert(0, result);
             output.set_len(1);
         }

@@ -1,0 +1,20 @@
+# name: test/sql/duckdb_sqruff.test
+# description: test duckdb_sqruff extension
+# group: [quack]
+
+# Before we load the extension, this will fail
+statement error
+SELECT duckdb_sqruff('SELECT 1');
+----
+Catalog Error: Scalar Function with name duckdb_sqruff does not exist!
+
+# Require statement will ensure the extension is loaded from now on
+require duckdb_sqruff
+
+require icu
+
+# Confirm the extension works
+query I
+SELECT replace(column0, E'\n', ' ') FROM duckdb_sqruff('WITH cte AS (SELECT a, b, c FROM foo) SELECT * FROM cte WHERE a > 3');
+----
+WITH cte AS (SELECT a, b, c FROM foo)  SELECT * FROM cte WHERE a > 3 
